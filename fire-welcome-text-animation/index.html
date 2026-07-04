@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes">
+  <title>Blazing Welcome | Realistic 3D Fire Spread</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+      background: #030101;
+      touch-action: manipulation;
+      height: 100vh;
+      width: 100vw;
+    }
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    /* UI overlay with animated text */
+    .ui-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: radial-gradient(circle at center, transparent 20%, rgba(2,0,0,0.65) 100%);
+    }
+    .text-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .welcome-text {
+      color: #fff9f0;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-shadow: 0 0 30px #ff5500, 0 0 70px #ff2200, 0 0 110px #cc0000;
+      animation: textGlow 1.8s ease-in-out infinite alternate;
+      opacity: 0;
+      transform: translateY(20px) scale(0.85);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      margin: 0;
+      font-size: clamp(3.5rem, 16vw, 6rem);
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .welcome-text.reveal {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      text-shadow: 0 0 40px #ff7b00, 0 0 85px #ff3300, 0 0 140px #cc1100, 0 0 200px #ff4400;
+    }
+    .sub-message {
+      color: #ffdbb5;
+      font-weight: 500;
+      font-size: clamp(1.2rem, 5vw, 2rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(25px);
+      transition: opacity 1s ease 0.25s, transform 0.85s ease 0.25s;
+      text-shadow: 0 0 20px #ff6600, 0 0 45px #cc3300;
+      background: rgba(8, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+      padding: 0.5rem 2.2rem;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 120, 30, 0.55);
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+    .sub-message.reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Animated extra tagline */
+    .tagline {
+      color: #ffccaa;
+      font-weight: 300;
+      font-size: clamp(0.9rem, 3.5vw, 1.3rem);
+      margin-top: 1rem;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.9s ease 0.5s, transform 0.7s ease 0.5s;
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 15px #ff4400;
+      background: rgba(0,0,0,0.3);
+      padding: 0.2rem 1.8rem;
+      border-radius: 30px;
+    }
+    .tagline.reveal {
+      opacity: 1;
+      transform: scale(1);
+    }
+    @keyframes textGlow {
+      0% { text-shadow: 0 0 25px #ff5500, 0 0 55px #dd2200, 0 0 90px #aa0000; }
+      100% { text-shadow: 0 0 45px #ff8c1a, 0 0 85px #ff4000, 0 0 140px #ff1a1a, 0 0 180px #ff5500; }
+    }
+    .hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 200, 150, 0.9);
+      font-size: 0.85rem;
+      letter-spacing: 1.5px;
+      z-index: 20;
+      background: rgba(30, 0, 0, 0.55);
+      backdrop-filter: blur(12px);
+      padding: 0.4rem 1.8rem;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 100, 0, 0.6);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    @media (max-width: 600px) {
+      .welcome-text {
+        white-space: normal;
+        padding: 0 0.4rem;
+        font-size: clamp(3.2rem, 18vw, 5rem);
+      }
+      .sub-message {
+        font-size: 0.9rem;
+        padding: 0.3rem 1.2rem;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div class="ui-overlay">
+    <div class="text-container">
+      <h1 class="welcome-text" id="welcomeTitle">WELCOME</h1>
+      <div class="sub-message" id="subMessage">to the fire</div>
+      <div class="tagline" id="tagline">✨ ignite your journey ✨</div>
+    </div>
+  </div>
+  <div class="hint">🔥 real flame • center burst • spread 200px high</div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+    import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
+
+    // ---------- CONFIGURATION (scaled for realistic small center, spread 200px high feel) ----------
+    const CONFIG = {
+      centerFlameRadius: 0.65,    // much smaller core
+      centerFlameHeight: 1.7,
+      spreadMaxRadius: 4.2,
+      spreadHeight: 2.3,         // corresponds to ~200px visual height
+    };
+
+    // ---------- SCENE SETUP ----------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050101);
+    scene.fog = new THREE.FogExp2(0x0a0101, 0.018);
+
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 1.2, 6.8);
+    camera.lookAt(0, 0.3, 0);
+
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: false,
+      powerPreference: "high-performance"
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x050101);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // Post processing for realistic glow
+    const renderScene = new RenderPass(scene, camera);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.4, 0.5, 0.9);
+    bloomPass.threshold = 0.15;
+    bloomPass.strength = 1.45;
+    bloomPass.radius = 0.75;
+    
+    const rgbShiftPass = new ShaderPass(RGBShiftShader);
+    rgbShiftPass.uniforms['amount'].value = 0.0032;
+    
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+    composer.addPass(rgbShiftPass);
+    rgbShiftPass.renderToScreen = true;
+
+    // ---------- LIGHTING (warm fire tones) ----------
+    const ambient = new THREE.AmbientLight(0x2a1005);
+    scene.add(ambient);
+    
+    const fireLight1 = new THREE.PointLight(0xff5500, 2.2, 10);
+    fireLight1.position.set(0, 0.7, 0.3);
+    scene.add(fireLight1);
+    
+    const fireLight2 = new THREE.PointLight(0xff3300, 1.4, 7);
+    fireLight2.position.set(0.5, 0.1, -0.8);
+    scene.add(fireLight2);
+    
+    const rimLight = new THREE.PointLight(0xff4400, 0.9, 6);
+    rimLight.position.set(-0.7, 0.3, 1.5);
+    scene.add(rimLight);
+
+    // ---------- CREATE REALISTIC FIRE TEXTURES PROCEDURALLY ----------
+    function createFireTexture(baseColor, brightColor) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      
+      // radial gradient resembling flame
+      const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      gradient.addColorStop(0, brightColor);
+      gradient.addColorStop(0.25, baseColor);
+      gradient.addColorStop(0.6, '#cc3300');
+      gradient.addColorStop(0.85, '#550000');
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 128, 128);
+      
+      // add noise-like flecks for realism
+      for (let i = 0; i < 80; i++) {
+        const x = Math.random() * 128;
+        const y = Math.random() * 128;
+        const rad = Math.random() * 8 + 1;
+        const alpha = Math.random() * 0.7;
+        ctx.fillStyle = `rgba(255, ${140 + Math.random()*80}, 20, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(x, y, rad, 0, Math.PI*2);
+        ctx.fill();
+      }
+      return new THREE.CanvasTexture(canvas);
+    }
+    
+    const fireTex1 = createFireTexture('#ff6600', '#ffcc33');
+    const fireTex2 = createFireTexture('#ff4400', '#ffaa00');
+    
+    // ---------- CENTER FIRE (small, realistic layered flames) ----------
+    const fireGroup = new THREE.Group();
+    scene.add(fireGroup);
+    
+    function createFlameCone(radius, height, texture, color, yOffset, opacity=0.9) {
+      const geometry = new THREE.ConeGeometry(radius, height, 48, 1, true);
+      const material = new THREE.MeshStandardMaterial({
+        map: texture,
+        color: color,
+        emissive: new THREE.Color(color).multiplyScalar(0.8),
+        roughness: 0.35,
+        transparent: true,
+        opacity: opacity,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const cone = new THREE.Mesh(geometry, material);
+      cone.position.y = yOffset;
+      return cone;
+    }
+    
+    // Main central flames (small scale)
+    const flameCore = createFlameCone(0.55, 1.65, fireTex1, '#ff8822', 0.45, 0.95);
+    const flameMid = createFlameCone(0.45, 1.55, fireTex2, '#ff6611', 0.6, 0.9);
+    const flameOuter = createFlameCone(0.38, 1.45, fireTex1, '#ff9933', 0.72, 0.85);
+    const flameTop = createFlameCone(0.25, 1.35, fireTex2, '#ffbb44', 0.88, 0.8);
+    
+    fireGroup.add(flameCore);
+    fireGroup.add(flameMid);
+    fireGroup.add(flameOuter);
+    fireGroup.add(flameTop);
+    
+    // Glowing ember core
+    const emberGeo = new THREE.SphereGeometry(0.38, 32, 32);
+    const emberMat = new THREE.MeshStandardMaterial({
+      color: '#ff8800',
+      emissive: new THREE.Color('#ff3300'),
+      roughness: 0.2,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const emberCore = new THREE.Mesh(emberGeo, emberMat);
+    emberCore.position.y = 0.48;
+    fireGroup.add(emberCore);
+    
+    // Small floating embers around center
+    const emberParticlesGeo = new THREE.BufferGeometry();
+    const emberCount = 180;
+    const emberPositions = new Float32Array(emberCount * 3);
+    for (let i = 0; i < emberCount * 3; i += 3) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 0.6 + Math.random() * 0.7;
+      const height = (Math.random() - 0.5) * 2.0;
+      emberPositions[i] = Math.cos(angle) * radius;
+      emberPositions[i+1] = height + 0.55;
+      emberPositions[i+2] = Math.sin(angle) * radius;
+    }
+    emberParticlesGeo.setAttribute('position', new THREE.BufferAttribute(emberPositions, 3));
+    const emberParticlesMat = new THREE.PointsMaterial({
+      color: '#ffaa33',
+      size: 0.07,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      map: (() => {
+        const c = document.createElement('canvas');
+        c.width = 16; c.height = 16;
+        const ctx = c.getContext('2d');
+        ctx.beginPath(); ctx.arc(8,8,5,0,2*Math.PI);
+        ctx.fillStyle = '#ffaa00'; ctx.fill();
+        return new THREE.CanvasTexture(c);
+      })()
+    });
+    const centerEmbers = new THREE.Points(emberParticlesGeo, emberParticlesMat);
+    fireGroup.add(centerEmbers);
+
+    // ---------- SPREAD FLAMES (realistic expanding rings + fire wisps) ----------
+    const spreadGroup = new THREE.Group();
+    scene.add(spreadGroup);
+    
+    // Expanding flame rings (torus with fire texture)
+    const rings = [];
+    const ringCount = 6;
+    for (let i = 0; i < ringCount; i++) {
+      const geometry = new THREE.TorusGeometry(0.25, 0.09, 24, 72);
+      const material = new THREE.MeshStandardMaterial({
+        map: fireTex2,
+        color: new THREE.Color(`hsl(${14 + i*4}, 95%, 58%)`),
+        emissive: new THREE.Color(`hsl(${10 + i*6}, 90%, 35%)`),
+        roughness: 0.4,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const ring = new THREE.Mesh(geometry, material);
+      ring.position.y = 0.25 + i * 0.2;
+      ring.visible = false;
+      ring.userData = {
+        baseScale: 0.25,
+        targetScale: CONFIG.spreadMaxRadius * (0.65 + i * 0.11),
+        speed: 0.02,
+        progress: 0,
+        active: false,
+        delay: i * 0.13
+      };
+      ring.scale.set(0.25, 0.25, 0.25);
+      spreadGroup.add(ring);
+      rings.push(ring);
+    }
+    
+    // Fire wisps (vertical pillars that move outward)
+    const wispGroup = new THREE.Group();
+    spreadGroup.add(wispGroup);
+    const wisps = [];
+    const wispCount = 16;
+    for (let i = 0; i < wispCount; i++) {
+      const angle = (i / wispCount) * Math.PI * 2;
+      const wispGeo = new THREE.ConeGeometry(0.15, 0.75, 8);
+      const wispMat = new THREE.MeshStandardMaterial({
+        map: fireTex1,
+        color: '#ff6600',
+        emissive: new THREE.Color('#cc3300'),
+        roughness: 0.45,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        transparent: true,
+        opacity: 0.85
+      });
+      const wisp = new THREE.Mesh(wispGeo, wispMat);
+      wisp.position.set(Math.cos(angle)*0.4, -0.15, Math.sin(angle)*0.4);
+      wisp.visible = false;
+      wisp.userData = {
+        angle,
+        baseRadius: 0.4,
+        targetRadius: CONFIG.spreadMaxRadius * 0.95,
+        heightBase: 0.75,
+        heightTarget: CONFIG.spreadHeight * 1.15,
+        progress: 0,
+        active: false,
+        delay: i * 0.05
+      };
+      wisp.scale.set(0.01, 0.01, 0.01);
+      wispGroup.add(wisp);
+      wisps.push(wisp);
+    }
+    
+    // Spread particle embers
+    const spreadParticlesGeo = new THREE.BufferGeometry();
+    const spreadParticleCount = 700;
+    const spreadPositions = new Float32Array(spreadParticleCount * 3);
+    spreadParticlesGeo.setAttribute('position', new THREE.BufferAttribute(spreadPositions, 3));
+    const spreadParticlesMat = new THREE.PointsMaterial({
+      color: '#ff8833',
+      size: 0.08,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      map: (() => {
+        const c = document.createElement('canvas');
+        c.width = 16; c.height = 16;
+        const ctx = c.getContext('2d');
+        ctx.beginPath(); ctx.arc(8,8,5,0,2*Math.PI);
+        ctx.fillStyle = '#ff7700'; ctx.fill();
+        return new THREE.CanvasTexture(c);
+      })(),
+      transparent: true,
+      opacity: 0.9
+    });
+    const spreadParticles = new THREE.Points(spreadParticlesGeo, spreadParticlesMat);
+    spreadParticles.visible = false;
+    spreadGroup.add(spreadParticles);
+    
+    const particleData = [];
+    for (let i = 0; i < spreadParticleCount; i++) {
+      particleData.push({
+        angle: Math.random() * Math.PI * 2,
+        radius: 0,
+        speed: 0.028 + Math.random() * 0.08,
+        heightOffset: (Math.random() - 0.5) * 2.0,
+        delay: Math.random() * 0.9
+      });
+    }
+
+    // ---------- ANIMATION STATE ----------
+    let clock = new THREE.Clock();
+    let spreadActive = false;
+    let spreadStartTime = 0;
+    const SPREAD_DURATION = 2.5;
+    
+    // UI elements
+    const welcomeTitle = document.getElementById('welcomeTitle');
+    const subMessage = document.getElementById('subMessage');
+    const tagline = document.getElementById('tagline');
+    
+    // Trigger spread after initial flame settles
+    setTimeout(() => {
+      startSpreadAnimation();
+    }, 900);
+    
+    function startSpreadAnimation() {
+      if (spreadActive) return;
+      spreadActive = true;
+      spreadStartTime = performance.now() / 1000;
+      
+      rings.forEach((ring, idx) => {
+        ring.visible = true;
+        ring.userData.active = true;
+        ring.userData.progress = 0;
+      });
+      wisps.forEach((wisp, idx) => {
+        wisp.visible = true;
+        wisp.userData.active = true;
+        wisp.userData.progress = 0;
+      });
+      spreadParticles.visible = true;
+      
+      // Text reveal sequence with animation
+      setTimeout(() => {
+        welcomeTitle.classList.add('reveal');
+      }, 300);
+      setTimeout(() => {
+        subMessage.classList.add('reveal');
+      }, 600);
+      setTimeout(() => {
+        tagline.classList.add('reveal');
+      }, 850);
+    }
+    
+    function animate() {
+      const delta = clock.getDelta();
+      const time = performance.now() / 1000;
+      
+      // Realistic center fire flicker
+      if (fireGroup) {
+        fireGroup.rotation.y += 0.0015;
+        const flicker = 1 + Math.sin(time * 18) * 0.04 + Math.sin(time * 27) * 0.03 + Math.sin(time * 41) * 0.02;
+        fireGroup.scale.set(flicker, flicker * 0.96, flicker);
+        flameCore.rotation.z = Math.sin(time * 7) * 0.06;
+        flameMid.rotation.z = Math.cos(time * 9) * 0.07;
+        centerEmbers.material.size = 0.07 + Math.sin(time * 35) * 0.025;
+        emberCore.material.emissiveIntensity = 0.9 + Math.sin(time * 20) * 0.2;
+      }
+      
+      // Spread animation
+      if (spreadActive) {
+        const elapsed = time - spreadStartTime;
+        
+        rings.forEach(ring => {
+          if (!ring.userData.active) return;
+          const delay = ring.userData.delay;
+          if (elapsed < delay) return;
+          const localTime = elapsed - delay;
+          let progress = Math.min(localTime / (SPREAD_DURATION * 0.85), 1.0);
+          progress = easeOutCubic(progress);
+          const scaleVal = ring.userData.baseScale + (ring.userData.targetScale - ring.userData.baseScale) * progress;
+          ring.scale.set(scaleVal, scaleVal, scaleVal);
+          ring.material.opacity = 0.8 * (1 - progress * 0.55);
+          ring.rotation.z += 0.012;
+          ring.rotation.x = Math.sin(time * 3 + ring.userData.delay) * 0.12;
+        });
+        
+        wisps.forEach(wisp => {
+          if (!wisp.userData.active) return;
+          const delay = wisp.userData.delay;
+          if (elapsed < delay) return;
+          const localTime = elapsed - delay;
+          let progress = Math.min(localTime / (SPREAD_DURATION * 0.9), 1.0);
+          progress = easeOutBack(progress);
+          const angle = wisp.userData.angle;
+          const radius = wisp.userData.baseRadius + (wisp.userData.targetRadius - wisp.userData.baseRadius) * progress;
+          const h = wisp.userData.heightBase + (wisp.userData.heightTarget - wisp.userData.heightBase) * progress;
+          wisp.position.x = Math.cos(angle) * radius;
+          wisp.position.z = Math.sin(angle) * radius;
+          wisp.position.y = -0.15 + progress * 0.5;
+          wisp.scale.set(1, h / 0.75, 1);
+          wisp.material.opacity = 0.85 * (1 - progress * 0.35);
+        });
+        
+        if (spreadParticles.visible) {
+          const positions = spreadParticlesGeo.attributes.position.array;
+          for (let i = 0; i < spreadParticleCount; i++) {
+            const data = particleData[i];
+            const i3 = i * 3;
+            if (elapsed < data.delay) {
+              positions[i3] = 0; positions[i3+1] = -10; positions[i3+2] = 0;
+              continue;
+            }
+            const localTime = elapsed - data.delay;
+            const prog = Math.min(localTime / (SPREAD_DURATION * 0.95), 1.0);
+            const eased = easeOutQuad(prog);
+            const r = eased * CONFIG.spreadMaxRadius * 1.25;
+            const ang = data.angle + prog * 0.7;
+            positions[i3] = Math.cos(ang) * r;
+            positions[i3+2] = Math.sin(ang) * r;
+            positions[i3+1] = data.heightOffset * (0.6 + eased * 0.9) + 0.5 + Math.sin(time*18 + i)*0.12;
+          }
+          spreadParticlesGeo.attributes.position.needsUpdate = true;
+        }
+        
+        fireLight1.intensity = 2.2 + Math.sin(time * 15) * 0.4;
+      }
+      
+      camera.lookAt(0, 0.4, 0);
+      composer.render();
+      requestAnimationFrame(animate);
+    }
+    
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function easeOutBack(t) { const c1 = 1.70158; return 1 + (c1+1)*Math.pow(t-1,3) + c1*Math.pow(t-1,2); }
+    function easeOutQuad(t) { return 1 - (1-t)*(1-t); }
+    
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // Tap to replay
+    window.addEventListener('click', () => {
+      if (!spreadActive || (performance.now()/1000 - spreadStartTime > 5.5)) {
+        resetAndReplay();
+      }
+    });
+    
+    function resetAndReplay() {
+      spreadActive = false;
+      rings.forEach(r => { r.visible = false; r.userData.active = false; r.scale.set(0.25,0.25,0.25); });
+      wisps.forEach(w => { w.visible = false; w.userData.active = false; w.scale.set(0.01,0.01,0.01); });
+      spreadParticles.visible = false;
+      welcomeTitle.classList.remove('reveal');
+      subMessage.classList.remove('reveal');
+      tagline.classList.remove('reveal');
+      setTimeout(() => startSpreadAnimation(), 250);
+    }
+    
+    animate();
+    console.log('🔥 Realistic fire animation running – small center, spreading flames, text animation.');
+  </script>
+</body>
+</html>

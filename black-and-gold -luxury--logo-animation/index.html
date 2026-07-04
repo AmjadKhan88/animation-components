@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Luxury Fire Logo Intro</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ==============================
+            THREE.JS CDN
+    =============================== -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Orbit Controls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- =============================
+            WEBGL CANVAS
+    ============================== -->
+
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- =============================
+            BACKGROUND STARS
+    ============================== -->
+
+    <div id="stars"></div>
+
+    <!-- =============================
+            SMOKE
+    ============================== -->
+
+    <div id="smokeContainer"></div>
+
+    <!-- =============================
+            PARTICLES
+    ============================== -->
+
+    <div id="particleContainer"></div>
+
+    <!-- =============================
+            MAIN WRAPPER
+    ============================== -->
+
+    <div class="wrapper">
+
+        <!-- OUTER GLOW -->
+        <div class="outerGlow"></div>
+
+        <!-- ENERGY RING -->
+        <div class="energyRing">
+
+            <div class="fire blue">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+
+            <div class="fire orange">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+
+        </div>
+
+        <div class="smoke blue large left"></div>
+        <div class="smoke orange large right"></div>
+
+        <div class="smoke blue small top"></div>
+        <div class="smoke orange small bottom"></div>
+
+        <!-- LOGO CONTAINER -->
+        <div class="logoBox">
+
+            <!-- GOLD BORDER -->
+            <div class="goldBorder">
+
+                <!-- Replace with your logo -->
+                <img src="logo.png" alt="Luxury Logo" id="logo">
+
+            </div>
+
+            <!-- Shine Effect -->
+            <div class="shine"></div>
+
+        </div>
+
+    </div>
+
+    <!-- =============================
+            LIGHT RAYS
+    ============================== -->
+
+    <div class="light light1"></div>
+    <div class="light light2"></div>
+
+    <!-- =============================
+            DUST
+    ============================== -->
+
+    <div class="dust"></div>
+
+    <!-- =============================
+            AMBIENT GLOW
+    ============================== -->
+
+    <div class="ambientGlow"></div>
+
+    <!-- =============================
+            AUDIO (Optional)
+    ============================== -->
+
+    <!--
+    <audio
+        id="introSound"
+        src="intro.mp3"
+        preload="auto">
+    </audio>
+    -->
+
+    <!-- =============================
+            JAVASCRIPT
+    ============================== -->
+
+    <div class="flash"></div>
+
+<div class="lightOrb blue"></div>
+<div class="lightOrb orange"></div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samira Shawn · Luxurystore</title>
+  <!-- Font Awesome for subtle icons (optional elegance) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0b0a0c;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Cinzel', 'Times New Roman', serif;
+    }
+
+    /* main card – mimics the "frame" from the image */
+    .luxury-frame {
+      position: relative;
+      width: 820px;
+      max-width: 94vw;
+      aspect-ratio: 16 / 9;
+      background: #1a171b;
+      border-radius: 48px 48px 32px 32px;
+      box-shadow: 
+        0 30px 60px rgba(0,0,0,0.8),
+        0 0 0 1px rgba(215, 190, 165, 0.15) inset,
+        0 0 0 2px rgba(255, 215, 150, 0.08);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    /* the infinite animation layer */
+    .infinite-canvas {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at 30% 30%, #2d2428, #0f0c0e 80%);
+      overflow: hidden;
+    }
+
+    /* central text group – exactly like the image "SAMIRA SHAWN" + "LUXURYSTORE" */
+    .brand-group {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      user-select: none;
+      pointer-events: none;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6));
+      animation: floatGlow 3.8s infinite alternate ease-in-out;
+    }
+
+    .brand-name {
+      font-size: clamp(2.8rem, 16vw, 5.8rem);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f2e5d4;
+      text-shadow: 
+        0 0 8px rgba(255, 215, 150, 0.3),
+        0 0 30px rgba(180, 130, 80, 0.2),
+        0 4px 12px rgba(0,0,0,0.7);
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: clamp(0.9rem, 4vw, 1.9rem);
+      letter-spacing: 0.6em;
+      text-transform: uppercase;
+      color: #c9b59b;
+      background: linear-gradient(135deg, #e8d5b8, #b89f84);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 18px rgba(200, 170, 130, 0.3);
+      margin-top: -0.3em;
+      font-weight: 300;
+      word-spacing: 0.3em;
+      opacity: 0.9;
+    }
+
+    /* infinite floating orbs / sparks – the "attractive infinite" effect */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(2px) brightness(1.2);
+      opacity: 0.5;
+      background: radial-gradient(circle at 30% 30%, #fae3c0, #a77b5a);
+      box-shadow: 0 0 40px rgba(230, 190, 150, 0.3);
+      will-change: transform, opacity, width, height;
+      animation: orbFloat infinite alternate ease-in-out;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* shimmer lines – adds luxury movement */
+    .shimmer-line {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 160, 0.4), rgba(255, 235, 200, 0.7), rgba(255, 215, 160, 0.4), transparent);
+      border-radius: 100%;
+      filter: blur(1.5px);
+      opacity: 0.2;
+      animation: shimmerSlide infinite linear;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* tiny sparkle dots (js will also create some) */
+    .sparkle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #fae2c0;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #eacbaa, 0 0 8px #fff2e0;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+      animation: sparkleFade 3s infinite;
+    }
+
+    /* animations */
+    @keyframes floatGlow {
+      0% { transform: translateY(-4px) scale(1); text-shadow: 0 0 15px rgba(200, 160, 120, 0.2); }
+      100% { transform: translateY(8px) scale(1.02); text-shadow: 0 0 35px rgba(230, 190, 150, 0.5), 0 0 70px rgba(180, 130, 80, 0.2); }
+    }
+
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(0.7) rotate(0deg); opacity: 0.25; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(1.3) rotate(15deg); opacity: 0.7; }
+    }
+
+    @keyframes shimmerSlide {
+      0% { transform: translateX(-120%) scaleX(0.6); opacity: 0; }
+      40% { opacity: 0.6; }
+      80% { opacity: 0.3; }
+      100% { transform: translateX(120%) scaleX(1.2); opacity: 0; }
+    }
+
+    @keyframes sparkleFade {
+      0% { opacity: 0; transform: scale(0.2); }
+      20% { opacity: 1; transform: scale(1.2); }
+      80% { opacity: 0.8; transform: scale(0.6); }
+      100% { opacity: 0; transform: scale(0.1); }
+    }
+
+    /* responsiveness */
+    @media (max-width: 600px) {
+      .luxury-frame {
+        border-radius: 28px;
+      }
+      .brand-sub {
+        letter-spacing: 0.3em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="luxury-frame">
+    <div class="infinite-canvas" id="infiniteCanvas">
+      <!-- central text -->
+      <div class="brand-group">
+        <div class="brand-name">SAMIRA SHAWN</div>
+        <div class="brand-sub">LUXURYSTORE</div>
+      </div>
+
+      <!-- dynamic elements injected by js (orbs, lines, sparkles) -->
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('infiniteCanvas');
+
+      // 1. create infinite floating orbs (10 pieces)
+      function createOrbs(count = 12) {
+        for (let i = 0; i < count; i++) {
+          const orb = document.createElement('div');
+          orb.className = 'orb';
+          const size = 20 + Math.random() * 80;
+          const x = 5 + Math.random() * 90;  // vw units will be relative via %
+          const y = 5 + Math.random() * 90;
+          const duration = 6 + Math.random() * 10;
+          const delay = Math.random() * -8;
+          const tx = (Math.random() - 0.5) * 180;
+          const ty = (Math.random() - 0.5) * 180;
+
+          orb.style.width = size + 'px';
+          orb.style.height = size + 'px';
+          orb.style.left = x + '%';
+          orb.style.top = y + '%';
+          orb.style.setProperty('--tx', tx + 'px');
+          orb.style.setProperty('--ty', ty + 'px');
+          orb.style.animationDuration = duration + 's';
+          orb.style.animationDelay = delay + 's';
+          orb.style.background = `radial-gradient(circle at 30% 30%, 
+            rgba(255, 225, 190, ${0.4 + Math.random() * 0.3}), 
+            rgba(180, 130, 80, ${0.2 + Math.random() * 0.2}))`;
+          orb.style.boxShadow = `0 0 ${30 + Math.random() * 50}px rgba(210, 170, 130, 0.2)`;
+          canvas.appendChild(orb);
+        }
+      }
+
+      // 2. shimmer lines (horizontal & diagonal)
+      function createShimmers(count = 6) {
+        for (let i = 0; i < count; i++) {
+          const line = document.createElement('div');
+          line.className = 'shimmer-line';
+          const top = 5 + Math.random() * 90;
+          const width = 30 + Math.random() * 60;
+          const duration = 4 + Math.random() * 10;
+          const delay = Math.random() * -6;
+          const rotate = (Math.random() - 0.5) * 25;
+          line.style.width = width + '%';
+          line.style.top = top + '%';
+          line.style.left = '5%';
+          line.style.animationDuration = duration + 's';
+          line.style.animationDelay = delay + 's';
+          line.style.transform = `rotate(${rotate}deg)`;
+          line.style.opacity = 0.1 + Math.random() * 0.25;
+          line.style.filter = 'blur(2px)';
+          canvas.appendChild(line);
+        }
+      }
+
+      // 3. sparkles (small dots with random positions and delays)
+      function createSparkles(count = 25) {
+        for (let i = 0; i < count; i++) {
+          const spark = document.createElement('div');
+          spark.className = 'sparkle';
+          const size = 4 + Math.random() * 10;
+          const x = 3 + Math.random() * 94;
+          const y = 3 + Math.random() * 94;
+          const delay = Math.random() * 5;
+          const duration = 2.5 + Math.random() * 3;
+          spark.style.width = size + 'px';
+          spark.style.height = size + 'px';
+          spark.style.left = x + '%';
+          spark.style.top = y + '%';
+          spark.style.animationDelay = delay + 's';
+          spark.style.animationDuration = duration + 's';
+          spark.style.background = `radial-gradient(circle, #fff5e6, #dbb48b)`;
+          spark.style.boxShadow = `0 0 ${12 + Math.random() * 20}px #ebcbaa`;
+          canvas.appendChild(spark);
+        }
+      }
+
+      // 4. extra glamour: a few floating "dust" particles (very tiny, slow)
+      function createDust(count = 18) {
+        for (let i = 0; i < count; i++) {
+          const dust = document.createElement('div');
+          dust.className = 'orb'; // reuse orb style but smaller
+          const size = 2 + Math.random() * 6;
+          const x = 2 + Math.random() * 96;
+          const y = 2 + Math.random() * 96;
+          const duration = 12 + Math.random() * 20;
+          const delay = Math.random() * -10;
+          const tx = (Math.random() - 0.5) * 120;
+          const ty = (Math.random() - 0.5) * 120;
+          dust.style.width = size + 'px';
+          dust.style.height = size + 'px';
+          dust.style.left = x + '%';
+          dust.style.top = y + '%';
+          dust.style.setProperty('--tx', tx + 'px');
+          dust.style.setProperty('--ty', ty + 'px');
+          dust.style.animationDuration = duration + 's';
+          dust.style.animationDelay = delay + 's';
+          dust.style.background = `radial-gradient(circle, #f5e3cc, #a88666)`;
+          dust.style.boxShadow = '0 0 10px rgba(200, 170, 130, 0.1)';
+          dust.style.filter = 'blur(1px)';
+          dust.style.opacity = 0.2 + Math.random() * 0.2;
+          canvas.appendChild(dust);
+        }
+      }
+
+      // 5. additional larger "slow drift" orbs for depth
+      function createDepthOrbs(count = 5) {
+        for (let i = 0; i < count; i++) {
+          const orb = document.createElement('div');
+          orb.className = 'orb';
+          const size = 80 + Math.random() * 140;
+          const x = 5 + Math.random() * 90;
+          const y = 5 + Math.random() * 90;
+          const duration = 18 + Math.random() * 20;
+          const delay = Math.random() * -12;
+          const tx = (Math.random() - 0.5) * 200;
+          const ty = (Math.random() - 0.5) * 200;
+          orb.style.width = size + 'px';
+          orb.style.height = size + 'px';
+          orb.style.left = x + '%';
+          orb.style.top = y + '%';
+          orb.style.setProperty('--tx', tx + 'px');
+          orb.style.setProperty('--ty', ty + 'px');
+          orb.style.animationDuration = duration + 's';
+          orb.style.animationDelay = delay + 's';
+          orb.style.background = `radial-gradient(circle at 40% 30%, rgba(190, 150, 110, 0.15), rgba(90, 60, 40, 0.08))`;
+          orb.style.boxShadow = '0 0 80px rgba(150, 110, 70, 0.08)';
+          orb.style.filter = 'blur(8px)';
+          orb.style.opacity = 0.3;
+          canvas.appendChild(orb);
+        }
+      }
+
+      // build the infinite animation scene
+      createOrbs(12);
+      createShimmers(8);
+      createSparkles(30);
+      createDust(20);
+      createDepthOrbs(6);
+
+      // make it truly "infinite" – we also adjust some orbs dynamically via css infinite
+      // but we also add a tiny mutation: every few seconds we rotate the whole container? 
+      // No, keep it subtle; but we can add a continuous scale pulse to the frame
+      // using JS to make it extra attractive: subtle breathing effect on the frame
+      const frame = document.querySelector('.luxury-frame');
+      let breathe = 0;
+      setInterval(() => {
+        breathe = (breathe + 1) % 200;
+        const scale = 1 + Math.sin(breathe * 0.02) * 0.002;
+        const shadow = 30 + Math.sin(breathe * 0.03) * 8;
+        frame.style.boxShadow = `0 ${shadow}px ${shadow * 1.6}px rgba(0,0,0,0.8), 0 0 0 1px rgba(215, 190, 165, 0.15) inset, 0 0 0 2px rgba(255, 215, 150, 0.06)`;
+        // subtle scale on the brand group
+        const group = document.querySelector('.brand-group');
+        if (group) {
+          const s = 1 + Math.sin(breathe * 0.025) * 0.003;
+          group.style.transform = `scale(${s})`;
+        }
+      }, 60);
+
+      // also add a few random "flare" effects (extra sparkle bursts) using JS
+      function createBurstSparkle() {
+        const spark = document.createElement('div');
+        spark.className = 'sparkle';
+        const size = 12 + Math.random() * 30;
+        const x = 5 + Math.random() * 90;
+        const y = 5 + Math.random() * 90;
+        spark.style.width = size + 'px';
+        spark.style.height = size + 'px';
+        spark.style.left = x + '%';
+        spark.style.top = y + '%';
+        spark.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+        spark.style.animationDelay = '0s';
+        spark.style.background = 'radial-gradient(circle, #fff8ee, #dbb48b)';
+        spark.style.boxShadow = '0 0 40px #f0d5b0, 0 0 80px rgba(200, 160, 120, 0.3)';
+        spark.style.filter = 'blur(0px)';
+        canvas.appendChild(spark);
+        // remove after animation ends to avoid accumulation
+        setTimeout(() => {
+          if (spark.parentNode) spark.remove();
+        }, 3500);
+      }
+
+      // launch burst sparkles every 1.5–2.5 sec
+      setInterval(() => {
+        if (Math.random() > 0.3) createBurstSparkle();
+      }, 1500);
+
+      // one extra trick: occasional light sweep (like a subtle lens flare)
+      setInterval(() => {
+        const sweep = document.createElement('div');
+        sweep.style.position = 'absolute';
+        sweep.style.width = '200%';
+        sweep.style.height = '120%';
+        sweep.style.background = 'linear-gradient(120deg, transparent 30%, rgba(255, 220, 170, 0.04) 50%, transparent 70%)';
+        sweep.style.top = '-20%';
+        sweep.style.left = '-50%';
+        sweep.style.transform = 'rotate(15deg)';
+        sweep.style.pointerEvents = 'none';
+        sweep.style.zIndex = '8';
+        sweep.style.animation = 'shimmerSlide 3s ease-in-out forwards';
+        sweep.style.opacity = '0';
+        canvas.appendChild(sweep);
+        setTimeout(() => {
+          if (sweep.parentNode) sweep.remove();
+        }, 3200);
+      }, 4000);
+
+      // ensure the canvas is clean if needed (no overaccumulation)
+    })();
+  </script>
+</body>
+</html>
