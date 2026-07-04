@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Black & Gold Luxury Logo | Infinite Animation</title>
+  <!-- Font Awesome for refined icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Playfair Display', 'Cinzel', 'Times New Roman', serif;
+      overflow: hidden;
+    }
+
+    /* luxury black canvas with subtle radial shimmer */
+    .animation-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      aspect-ratio: 16 / 9;
+      background: radial-gradient(circle at center, #1a1a1a 0%, #000000 90%);
+      border: 2px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 0 0 60px rgba(212, 175, 55, 0.2), inset 0 0 40px rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    /* gold particle layer (canvas) */
+    #particleCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* main logo content */
+    .logo-content {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 2rem;
+    }
+
+    /* elegant diamond / luxury shape using icon */
+    .luxury-icon {
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      color: #d4af37;
+      text-shadow: 0 0 25px #b4942e, 0 0 45px rgba(212, 175, 55, 0.7);
+      margin-bottom: 0.5rem;
+      animation: floatIcon 3s infinite ease-in-out, metallicPulse 2s infinite alternate;
+      background: linear-gradient(180deg, #f9e076 0%, #d4af37 40%, #aa8c2c 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 15px #d4af37);
+      transition: all 0.3s;
+    }
+
+    /* main brand text */
+    .brand-name {
+      font-size: clamp(2.2rem, 8vw, 5rem);
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #e9d097;
+      background: linear-gradient(180deg, #f5e7b3 0%, #d4af37 45%, #8b7322 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(212, 175, 55, 0.6), 0 5px 15px rgba(0,0,0,0.7);
+      margin: 0.2rem 0;
+      animation: textGlow 2.8s infinite alternate, subtleScale 4s infinite;
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      font-size: clamp(0.9rem, 2.5vw, 1.5rem);
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: #c5a028;
+      font-weight: 300;
+      margin-top: 0.5rem;
+      border-top: 1px solid rgba(212, 175, 55, 0.5);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.5);
+      padding: 0.8rem 2rem;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      animation: fadeBorder 3s infinite alternate;
+      text-shadow: 0 0 18px #b4942e;
+    }
+
+    /* decorative lines */
+    .gold-line {
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #d4af37, #f9e076, #d4af37, transparent);
+      margin: 0.5rem 0;
+      filter: drop-shadow(0 0 8px #d4af37);
+      animation: expandLine 2.5s infinite alternate ease-in-out;
+    }
+
+    .gold-line.short {
+      width: 35%;
+    }
+
+    /* keyframes for infinite luxurious motion */
+    @keyframes floatIcon {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes metallicPulse {
+      0% { filter: drop-shadow(0 0 15px #d4af37); }
+      100% { filter: drop-shadow(0 0 35px #f9e076); }
+    }
+
+    @keyframes textGlow {
+      0% { text-shadow: 0 0 25px rgba(212, 175, 55, 0.5), 0 5px 15px black; }
+      100% { text-shadow: 0 0 50px rgba(255, 215, 0, 0.9), 0 0 30px #b4942e; }
+    }
+
+    @keyframes subtleScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes expandLine {
+      0% { width: 40%; opacity: 0.7; }
+      100% { width: 70%; opacity: 1; }
+    }
+
+    @keyframes fadeBorder {
+      0% { border-color: rgba(212, 175, 55, 0.3); box-shadow: 0 0 15px rgba(212,175,55,0.3); }
+      100% { border-color: rgba(212, 175, 55, 0.9); box-shadow: 0 0 30px rgba(212,175,55,0.8); }
+    }
+
+    /* responsive adjustments */
+    @media (max-width: 600px) {
+      .brand-name {
+        letter-spacing: 0.2em;
+      }
+      .subtitle {
+        letter-spacing: 0.3em;
+        padding: 0.5rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animation-container">
+    <!-- canvas for dynamic gold particles / sparkles -->
+    <canvas id="particleCanvas"></canvas>
+    
+    <!-- central luxury logo elements -->
+    <div class="logo-content">
+      <!-- top decorative line -->
+      <div class="gold-line"></div>
+      
+      <!-- luxury icon (diamond / crown alternative) -->
+      <i class="fas fa-gem luxury-icon"></i>
+      
+      <!-- main brand name -->
+      <h1 class="brand-name">AURUM</h1>
+      
+      <!-- subtitle / tagline -->
+      <div class="subtitle">ELITE • ELEGANCE</div>
+      
+      <!-- bottom decorative line -->
+      <div class="gold-line short"></div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('particleCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      let width, height;
+      let particles = [];
+      
+      // Configuration for luxurious gold particles
+      const PARTICLE_COUNT = 80;
+      const GOLD_COLORS = [
+        'rgba(212, 175, 55, 0.9)',   // classic gold
+        'rgba(249, 224, 118, 0.95)', // light gold
+        'rgba(180, 148, 46, 0.8)',   // darker gold
+        'rgba(255, 215, 0, 0.7)',    // bright gold
+        'rgba(232, 197, 88, 0.85)'
+      ];
+      
+      // Particle class representing floating gold sparkles / dust
+      class GoldParticle {
+        constructor() {
+          this.reset(true);
+        }
+        
+        reset(initial = false) {
+          // random position across canvas
+          this.x = Math.random() * width;
+          this.y = initial ? Math.random() * height : height + 10;
+          
+          // size variation for depth
+          this.size = Math.random() * 3.2 + 0.8;
+          
+          // subtle movement speed
+          this.speedY = -(Math.random() * 0.6 + 0.25); // gently float upward
+          this.speedX = (Math.random() - 0.5) * 0.4;   // slight horizontal drift
+          
+          // opacity pulse
+          this.opacity = Math.random() * 0.7 + 0.3;
+          this.opacitySpeed = (Math.random() * 0.008 + 0.004);
+          this.opacityDirection = 1;
+          
+          // color selection
+          this.color = GOLD_COLORS[Math.floor(Math.random() * GOLD_COLORS.length)];
+          
+          // shimmer factor
+          this.twinkle = Math.random() * 0.5;
+        }
+        
+        update() {
+          // move particle
+          this.y += this.speedY;
+          this.x += this.speedX;
+          
+          // opacity pulsating for shimmer effect
+          this.opacity += this.opacitySpeed * this.opacityDirection;
+          if (this.opacity >= 0.9) {
+            this.opacity = 0.9;
+            this.opacityDirection = -1;
+          } else if (this.opacity <= 0.25) {
+            this.opacity = 0.25;
+            this.opacityDirection = 1;
+          }
+          
+          // reset if particle goes off top or sides (infinite flow)
+          if (this.y < -10 || this.x < -15 || this.x > width + 15) {
+            this.reset(false);
+            // ensure new particles appear from bottom area or sides naturally
+            this.y = height + 10 + Math.random() * 15;
+            this.x = Math.random() * width;
+          }
+        }
+        
+        draw(ctx) {
+          ctx.save();
+          // apply gold glow effect
+          ctx.shadowColor = '#d4af37';
+          ctx.shadowBlur = 8;
+          ctx.globalAlpha = this.opacity;
+          
+          // draw glowing circle / sparkle
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          
+          // fill with gradient-like feeling using solid color + shadow
+          ctx.fillStyle = this.color;
+          ctx.fill();
+          
+          // extra tiny bright core
+          ctx.shadowBlur = 12;
+          ctx.globalAlpha = this.opacity * 0.9;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size * 0.5, 0, Math.PI * 2);
+          ctx.fillStyle = '#FFF9E6';
+          ctx.fill();
+          
+          ctx.restore();
+        }
+      }
+      
+      function resizeCanvas() {
+        const container = document.querySelector('.animation-container');
+        if (!container) return;
+        
+        width = container.clientWidth;
+        height = container.clientHeight;
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // reinitialize particles when canvas resizes to keep density
+        initParticles();
+      }
+      
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push(new GoldParticle());
+        }
+      }
+      
+      function animateParticles() {
+        if (!ctx || !canvas) return;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        // draw subtle radial gradient overlay on canvas for depth? 
+        // better leave transparent, particles only.
+        
+        for (let p of particles) {
+          p.update();
+          p.draw(ctx);
+        }
+        
+        requestAnimationFrame(animateParticles);
+      }
+      
+      // handle window resize
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+      });
+      
+      // initial setup
+      resizeCanvas();
+      animateParticles();
+      
+      // Additional subtle interaction: recreate particles if needed (already infinite)
+      // Ensure canvas resizes correctly on orientation change
+      window.addEventListener('orientationchange', () => {
+        setTimeout(resizeCanvas, 30);
+      });
+      
+      // Also observe container size changes (in case of dynamic layout)
+      const containerObserver = new ResizeObserver(() => {
+        resizeCanvas();
+      });
+      const containerElement = document.querySelector('.animation-container');
+      if (containerElement) {
+        containerObserver.observe(containerElement);
+      }
+    })();
+  </script>
+</body>
+</html>
