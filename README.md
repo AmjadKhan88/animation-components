@@ -8,7 +8,7 @@ A collection of interactive animation components with **inline video playback**.
 
 ### 1. Bouncing Ball Animation
 
-https://github.com/user-attachments/assets/your-video-id-here
+https://github.com/AmjadKhan88/animation-components/videos/fire-welcome-text-animation.mp4
 
 *Click the play button above to see the bouncing ball animation in action*
 
