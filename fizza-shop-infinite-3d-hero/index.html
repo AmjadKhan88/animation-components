@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Fizza Shop | Infinite 3D Hero</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', 'Poppins', sans-serif;
+    }
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .hero-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      text-align: center;
+      color: white;
+      pointer-events: none;
+      text-shadow: 0 0 30px rgba(0,0,0,0.7);
+      width: 100%;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    .hero-title {
+      font-size: clamp(3rem, 10vw, 7rem);
+      font-weight: 800;
+      margin-top: -250px;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, #ffb347, #ff6b6b, #feca57);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+      animation: titlePulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+      0% { transform: scale(1); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+      50% { transform: scale(1.03); filter: drop-shadow(0 15px 30px rgba(255,180,70,0.6)); }
+      100% { transform: scale(1); filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+    }
+
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  
+  <div class="hero-content">
+    <h1 class="hero-title">FIZZA SHOP</h1>
+  </div>
+  
+
+  <!-- Import maps and libraries -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // --- INITIALIZATION ---
+    const container = document.getElementById('canvas-container');
+    
+    // Scene with animated gradient background effect
+    const scene = new THREE.Scene();
+    
+    // Create a dynamic background using a canvas texture
+    const bgCanvas = document.createElement('canvas');
+    bgCanvas.width = 512;
+    bgCanvas.height = 512;
+    const bgCtx = bgCanvas.getContext('2d');
+    
+    function updateBackgroundTexture(time) {
+      // Gradient that shifts over time
+      const hue1 = (time * 0.05) % 360;
+      const hue2 = (hue1 + 60) % 360;
+      const gradient = bgCtx.createLinearGradient(0, 0, bgCanvas.width, bgCanvas.height);
+      gradient.addColorStop(0, `hsl(${hue1}, 80%, 30%)`);
+      gradient.addColorStop(0.5, `hsl(${hue2}, 70%, 20%)`);
+      gradient.addColorStop(1, `hsl(${(hue1+120)%360}, 80%, 15%)`);
+      bgCtx.fillStyle = gradient;
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+      
+      // Add some subtle stars/dots
+      bgCtx.fillStyle = 'rgba(255,255,255,0.7)';
+      for (let i = 0; i < 40; i++) {
+        const x = (Math.sin(i * 12.7 + time * 0.02) * 0.5 + 0.5) * bgCanvas.width;
+        const y = (Math.cos(i * 7.3 + time * 0.03) * 0.5 + 0.5) * bgCanvas.height;
+        bgCtx.beginPath();
+        bgCtx.arc(x, y, 1.2 + Math.sin(time * 5 + i) * 0.5, 0, Math.PI*2);
+        bgCtx.fill();
+      }
+    }
+    
+    updateBackgroundTexture(0);
+    const bgTexture = new THREE.CanvasTexture(bgCanvas);
+    scene.background = bgTexture;
+    
+    // Camera
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.5, 100);
+    camera.position.set(4, 2.5, 7);
+    camera.lookAt(0, 1.2, 0);
+    
+    // Renderers
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      alpha: false 
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+    
+    // CSS2 Renderer for the banner text (makes it crisp)
+    const css2DRenderer = new CSS2DRenderer();
+    css2DRenderer.setSize(window.innerWidth, window.innerHeight);
+    css2DRenderer.domElement.style.position = 'absolute';
+    css2DRenderer.domElement.style.top = '0px';
+    css2DRenderer.domElement.style.left = '0px';
+    css2DRenderer.domElement.style.pointerEvents = 'none'; // allow clicking through to hero content
+    container.appendChild(css2DRenderer.domElement);
+    
+    // --- LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0x404066);
+    scene.add(ambientLight);
+    
+    const keyLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+    keyLight.position.set(5, 8, 5);
+    keyLight.castShadow = true;
+    keyLight.receiveShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.camera.near = 1;
+    keyLight.shadow.camera.far = 25;
+    keyLight.shadow.camera.left = -7;
+    keyLight.shadow.camera.right = 7;
+    keyLight.shadow.camera.top = 5;
+    keyLight.shadow.camera.bottom = -3;
+    scene.add(keyLight);
+    
+    const backLight = new THREE.PointLight(0x4466aa, 0.8);
+    backLight.position.set(-2, 1.5, -3);
+    scene.add(backLight);
+    
+    const rimLight = new THREE.PointLight(0xffaa88, 0.7);
+    rimLight.position.set(2, 1, -2);
+    scene.add(rimLight);
+    
+    // --- GROUND & ENVIRONMENT ---
+    const groundGeometry = new THREE.CircleGeometry(6, 64);
+    const groundMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x1a1a2e, 
+      roughness: 0.7,
+      metalness: 0.4,
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.51;
+    ground.receiveShadow = true;
+    scene.add(ground);
+    
+    // Decorative floating particles around the scene
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 400;
+    const posArray = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount * 3; i += 3) {
+      posArray[i] = (Math.random() - 0.5) * 9;
+      posArray[i+1] = (Math.random() * 5) + 0.2;
+      posArray[i+2] = (Math.random() - 0.5) * 7;
+    }
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    const particlesMaterial = new THREE.PointsMaterial({
+      color: 0xffaa55,
+      size: 0.04,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.7
+    });
+    const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particles);
+    
+    // --- CREATE THE CHARACTER (Stylized Man) ---
+    const manGroup = new THREE.Group();
+    manGroup.position.set(0, 0, 0);
+    
+    // Material colors
+    const skinColor = 0xffccaa;
+    const pantsColor = 0x2c3e50;
+    const shirtColor = 0xe67e22;
+    const shoeColor = 0x3e2723;
+    const hatColor = 0xc0392b;
+    
+    // Body / Torso
+    const torsoGeo = new THREE.CylinderGeometry(0.45, 0.5, 1.1, 10);
+    const torso = new THREE.Mesh(torsoGeo, new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.4 }));
+    torso.position.y = 0.65;
+    torso.castShadow = true;
+    torso.receiveShadow = true;
+    manGroup.add(torso);
+    
+    // Pants
+    const pantsGeo = new THREE.CylinderGeometry(0.42, 0.48, 0.8, 10);
+    const pants = new THREE.Mesh(pantsGeo, new THREE.MeshStandardMaterial({ color: pantsColor, roughness: 0.6 }));
+    pants.position.y = 0.15;
+    pants.castShadow = true;
+    pants.receiveShadow = true;
+    manGroup.add(pants);
+    
+    // Head
+    const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
+    const head = new THREE.Mesh(headGeo, new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.2 }));
+    head.position.y = 1.4;
+    head.castShadow = true;
+    head.receiveShadow = true;
+    manGroup.add(head);
+    
+    // Hat
+    const hatBaseGeo = new THREE.CylinderGeometry(0.38, 0.4, 0.15, 8);
+    const hatBase = new THREE.Mesh(hatBaseGeo, new THREE.MeshStandardMaterial({ color: hatColor, roughness: 0.3 }));
+    hatBase.position.y = 1.72;
+    hatBase.castShadow = true;
+    hatBase.receiveShadow = true;
+    manGroup.add(hatBase);
+    
+    const hatTopGeo = new THREE.CylinderGeometry(0.2, 0.28, 0.3, 8);
+    const hatTop = new THREE.Mesh(hatTopGeo, new THREE.MeshStandardMaterial({ color: hatColor, roughness: 0.3 }));
+    hatTop.position.y = 1.95;
+    hatTop.castShadow = true;
+    hatTop.receiveShadow = true;
+    manGroup.add(hatTop);
+    
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMaterial);
+    leftEye.position.set(-0.15, 1.48, 0.32);
+    manGroup.add(leftEye);
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMaterial);
+    rightEye.position.set(0.15, 1.48, 0.32);
+    manGroup.add(rightEye);
+    
+    // Arms (positioned to hold banner)
+    const armGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.8, 8);
+    const armMaterial = new THREE.MeshStandardMaterial({ color: shirtColor, roughness: 0.4 });
+    
+    // Left arm
+    const leftArm = new THREE.Mesh(armGeo, armMaterial);
+    leftArm.position.set(-0.55, 1.1, 0);
+    leftArm.rotation.z = 0.4;
+    leftArm.rotation.x = -0.2;
+    leftArm.castShadow = true;
+    leftArm.receiveShadow = true;
+    manGroup.add(leftArm);
+    
+    // Right arm
+    const rightArm = new THREE.Mesh(armGeo, armMaterial);
+    rightArm.position.set(0.55, 1.1, 0);
+    rightArm.rotation.z = -0.4;
+    rightArm.rotation.x = -0.2;
+    rightArm.castShadow = true;
+    rightArm.receiveShadow = true;
+    manGroup.add(rightArm);
+    
+    // Hands
+    const handGeo = new THREE.SphereGeometry(0.13, 8, 8);
+    const handMaterial = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.2 });
+    const leftHand = new THREE.Mesh(handGeo, handMaterial);
+    leftHand.position.set(-0.78, 0.75, 0.05);
+    leftHand.castShadow = true;
+    leftHand.receiveShadow = true;
+    manGroup.add(leftHand);
+    
+    const rightHand = new THREE.Mesh(handGeo, handMaterial);
+    rightHand.position.set(0.78, 0.75, 0.05);
+    rightHand.castShadow = true;
+    rightHand.receiveShadow = true;
+    manGroup.add(rightHand);
+    
+    // Shoes
+    const shoeGeo = new THREE.BoxGeometry(0.25, 0.15, 0.4);
+    const shoeMat = new THREE.MeshStandardMaterial({ color: shoeColor, roughness: 0.7 });
+    const leftShoe = new THREE.Mesh(shoeGeo, shoeMat);
+    leftShoe.position.set(-0.25, -0.02, 0.15);
+    leftShoe.castShadow = true;
+    leftShoe.receiveShadow = true;
+    manGroup.add(leftShoe);
+    const rightShoe = new THREE.Mesh(shoeGeo, shoeMat);
+    rightShoe.position.set(0.25, -0.02, 0.15);
+    rightShoe.castShadow = true;
+    rightShoe.receiveShadow = true;
+    manGroup.add(rightShoe);
+    
+    scene.add(manGroup);
+    
+    // --- BANNER (Fizza Shop) ---
+    const bannerGroup = new THREE.Group();
+    
+    // Banner pole
+    const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.2, 8);
+    const pole = new THREE.Mesh(poleGeo, new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.4, metalness: 0.5 }));
+    pole.position.y = 1.1;
+    pole.castShadow = true;
+    pole.receiveShadow = true;
+    bannerGroup.add(pole);
+    
+    // Banner fabric (using a plane with CSS2D for text, but also add a colored fabric)
+    const fabricGeo = new THREE.PlaneGeometry(1.5, 0.7);
+    const fabricMat = new THREE.MeshStandardMaterial({ 
+      color: 0xf39c12, 
+      roughness: 0.3,
+      emissive: new THREE.Color(0x331100),
+      side: THREE.DoubleSide
+    });
+    const fabric = new THREE.Mesh(fabricGeo, fabricMat);
+    fabric.position.set(0, 1.65, 0.05);
+    fabric.castShadow = true;
+    fabric.receiveShadow = true;
+    bannerGroup.add(fabric);
+    
+    // Decorative border on fabric
+    const borderGeo = new THREE.TorusGeometry(0.72, 0.04, 8, 20);
+    const borderMat = new THREE.MeshStandardMaterial({ color: 0xd35400, roughness: 0.2, metalness: 0.3 });
+    const border = new THREE.Mesh(borderGeo, borderMat);
+    border.position.set(0, 1.65, 0.08);
+    border.rotation.x = Math.PI/2;
+    bannerGroup.add(border);
+    
+    // CSS2D Text for "FIZZA SHOP" on banner
+    const bannerTextDiv = document.createElement('div');
+    bannerTextDiv.textContent = 'FIZZA SHOP';
+    bannerTextDiv.style.color = '#ffffff';
+    bannerTextDiv.style.fontWeight = '900';
+    bannerTextDiv.style.fontSize = '28px';
+    bannerTextDiv.style.fontFamily = 'Poppins, sans-serif';
+    bannerTextDiv.style.textShadow = '2px 2px 6px black';
+    bannerTextDiv.style.letterSpacing = '2px';
+    bannerTextDiv.style.background = 'linear-gradient(45deg, #ff6b6b, #feca57)';
+    bannerTextDiv.style.webkitBackgroundClip = 'text';
+    bannerTextDiv.style.webkitTextFillColor = 'transparent';
+    bannerTextDiv.style.backgroundClip = 'text';
+    bannerTextDiv.style.filter = 'drop-shadow(0 2px 4px black)';
+    
+    const bannerLabel = new CSS2DObject(bannerTextDiv);
+    bannerLabel.position.set(0, 1.65, 0.2);
+    bannerGroup.add(bannerLabel);
+    
+    // Position banner relative to man (in front of hands)
+    bannerGroup.position.set(0, 0.2, 0.45);
+    manGroup.add(bannerGroup);
+    
+    // Adjust hands to appear holding the pole
+    leftHand.position.set(-0.2, 0.95, 0.45);
+    rightHand.position.set(0.2, 0.95, 0.45);
+    
+    // --- ANIMATION LOOP: Move man from side to side infinitely ---
+    let clock = new THREE.Clock();
+    
+    // Movement parameters
+    const moveSpeed = 1.2;
+    const leftBound = -2.8;
+    const rightBound = 2.8;
+    let direction = 1; // 1 for right, -1 for left
+    
+    // Store initial Y so we can add a subtle bob
+    const baseY = manGroup.position.y;
+    
+    function animate() {
+      const delta = clock.getDelta();
+      const elapsedTime = performance.now() * 0.001; // seconds for animations
+      
+      // Update background texture dynamically
+      updateBackgroundTexture(elapsedTime);
+      if (scene.background) {
+        scene.background.needsUpdate = true;
+      }
+      
+      // Move man group along X axis
+      manGroup.position.x += moveSpeed * delta * direction;
+      
+      // Check bounds and reverse direction
+      if (manGroup.position.x > rightBound) {
+        manGroup.position.x = rightBound;
+        direction = -1;
+        // Flip the man to face left (rotate Y 180 degrees)
+        manGroup.rotation.y = Math.PI;
+      } else if (manGroup.position.x < leftBound) {
+        manGroup.position.x = leftBound;
+        direction = 1;
+        // Face right (rotation 0)
+        manGroup.rotation.y = 0;
+      }
+      
+      // Subtle walking bob
+      manGroup.position.y = baseY + Math.sin(elapsedTime * 15) * 0.03;
+      
+      // Animate particles rotation for dynamic feel
+      particles.rotation.y += 0.0008;
+      particles.rotation.x = Math.sin(elapsedTime * 0.2) * 0.1;
+      
+      // Rotate rim light slightly
+      rimLight.position.x = Math.sin(elapsedTime * 0.7) * 2.5;
+      rimLight.position.z = Math.cos(elapsedTime * 0.5) * 2.2;
+      
+      // Banner slight sway
+      bannerGroup.rotation.z = Math.sin(elapsedTime * 8) * 0.03;
+      
+      // Render
+      renderer.render(scene, camera);
+      css2DRenderer.render(scene, camera);
+      
+      requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    // --- RESIZE HANDLER ---
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      css2DRenderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    // Optional: small initial rotation to show facing right
+    manGroup.rotation.y = 0;
+    manGroup.position.x = 0;
+    
+    console.log('🎪 Fizza Shop 3D Hero - Infinite Animation Running!');
+  </script>
+</body>
+</html>
